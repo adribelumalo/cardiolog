@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CardioLog</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2333;
+    --border: #2a3045;
+    --red: #e05c6a;
+    --red-soft: #c94454;
+    --red-glow: rgba(224,92,106,0.15);
+    --teal: #4ecdc4;
+    --teal-soft: rgba(78,205,196,0.12);
+    --gold: #f0c27f;
+    --text: #eef0f6;
+    --text-muted: #7a859e;
+    --text-dim: #4a5568;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 52px 24px 20px;
+    background: linear-gradient(180deg, #12141e 0%, transparent 100%);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--red); }
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .icon-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all .2s;
+  }
+  .icon-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* NAV */
+  .nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .nav-btn.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+  }
+  .nav-btn:not(.active):hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  /* MAIN */
+  .main { padding: 16px 24px 100px; }
+
+  /* SECTION */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .card-actions { display: flex; gap: 8px; }
+  .btn-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: all .2s;
+  }
+  .btn-icon:hover { border-color: var(--red); color: var(--red); }
+  .btn-icon.danger:hover { border-color: #e05c6a; color: #e05c6a; }
+
+  /* DOSIS TABLE */
+  .dosis-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .dosis-day {
+    text-align: center;
+  }
+  .dosis-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .dosis-val {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--teal);
+    text-align: center;
+  }
+  .dosis-val.zero { color: var(--text-dim); }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-active { background: rgba(78,205,196,0.15); color: var(--teal); }
+  .badge-past { background: rgba(122,133,158,0.15); color: var(--text-muted); }
+  .badge-inr { background: var(--red-glow); color: var(--red); }
+  .badge-ok { background: rgba(78,205,196,0.15); color: var(--teal); }
+  .badge-high { background: rgba(240,194,127,0.15); color: var(--gold); }
+
+  /* HISTORY TIMELINE */
+  .history-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .history-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .history-dot.teal { background: var(--teal); }
+  .history-date { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+  .history-desc { font-size: 13px; color: var(--text); }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--red);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(224,92,106,0.4);
+    transition: all .2s;
+    z-index: 200;
+  }
+  .fab:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(224,92,106,0.5); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,12,20,0.85);
+    z-index: 500;
+    align-items: flex-end;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px 40px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    margin-top: -2px;
+  }
+
+  /* FORM */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-input:focus { border-color: var(--red); }
+  .form-input::placeholder { color: var(--text-dim); }
+  select.form-input { appearance: none; cursor: pointer; }
+
+  /* DOSIS POR DIA */
+  .dosis-form-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .dosis-form-day { text-align: center; }
+  .dosis-form-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .dosis-form-input {
+    width: 100%;
+    padding: 8px 2px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--teal);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .dosis-form-input:focus { border-color: var(--teal); }
+
+  /* BTN */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    margin-top: 8px;
+  }
+  .btn-primary { background: var(--red); color: white; }
+  .btn-primary:hover { background: var(--red-soft); }
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  /* EMPTY STATE */
+  .empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-text { font-size: 14px; line-height: 1.5; }
+
+  /* INR CARD */
+  .inr-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .inr-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .inr-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .inr-right { text-align: right; }
+
+  /* STUDY CARD */
+  .study-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 10px;
+  }
+  .study-type {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .study-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+  .study-result {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .study-date { font-size: 11px; color: var(--text-dim); }
+
+  /* HISTORIAL */
+  .hist-period {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-bottom: 10px;
+  }
+  .hist-med { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .hist-range { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+  .hist-dosis-summary {
+    font-size: 13px;
+    color: var(--teal);
+    background: var(--teal-soft);
+    padding: 6px 12px;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  /* BACKUP */
+  .backup-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .backup-icon { font-size: 32px; margin-bottom: 8px; }
+  .backup-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .backup-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 8px 0 16px; }
+
+  /* RANGE TARGET */
+  .inr-target {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .inr-target-val {
+    background: var(--red-glow);
+    color: var(--red);
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* NOTIFICATION */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--teal);
+    color: #0f1117;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all .3s;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">Cardio<span>Log</span></div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="showBackup()" title="Backup">💾</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="showSection('meds', this)">💊 Medicamentos</button>
+    <button class="nav-btn" onclick="showSection('inr', this)">🩸 INR</button>
+    <button class="nav-btn" onclick="showSection('estudios', this)">🔬 Estudios</button>
+    <button class="nav-btn" onclick="showSection('historial', this)">📋 Historial</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- MEDICAMENTOS -->
+  <div class="section active" id="sec-meds">
+    <p class="section-title">Medicamentos</p>
+    <div id="meds-list"></div>
+  </div>
+
+  <!-- INR -->
+  <div class="section" id="sec-inr">
+    <p class="section-title">Control INR</p>
+    <div class="inr-target">
+      Rango objetivo: <span class="inr-target-val" id="inr-target-display">2.0 – 3.0</span>
+      <button class="btn-icon" onclick="editInrTarget()" style="width:auto;padding:2px 8px;font-size:11px;">✏️ editar</button>
+    </div>
+    <div id="inr-list"></div>
+  </div>
+
+  <!-- ESTUDIOS -->
+  <div class="section" id="sec-estudios">
+    <p class="section-title">Estudios</p>
+    <div id="estudios-list"></div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="section" id="sec-historial">
+    <p class="section-title">Historial de cambios</p>
+    <div id="historial-list"></div>
+  </div>
+
+</div>
+
+<button class="fab" id="fab-btn" onclick="openAddModal()">+</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL MEDICAMENTO -->
+<div class="modal-overlay" id="modal-med">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-med')">×</button>
+    <div class="modal-title" id="modal-med-title">Nuevo medicamento</div>
+    <input type="hidden" id="med-edit-id">
+    <input type="hidden" id="med-edit-period-idx">
+
+    <div class="form-group">
+      <label class="form-label">Nombre del medicamento</label>
+      <input class="form-input" id="med-name" placeholder="Ej: Warfarina, Acenocumarol..." autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Unidad</label>
+      <select class="form-input" id="med-unit">
+        <option value="mg">mg</option>
+        <option value="comprimidos">comprimidos</option>
+        <option value="ml">ml</option>
+        <option value="gotas">gotas</option>
+        <option value="UI">UI</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dosis por día de la semana</label>
+      <div class="dosis-form-grid">
+        <div class="dosis-form-day"><span class="dosis-form-label">Lun</span><input class="dosis-form-input" id="d-lun" placeholder="0" type="number" min="0" step="0.25"></div>
+        <div class="dosis-form-day"><span class="dosis-form-label">Mar</span><input class="dosis-form-input" id="d-mar" placeholder="0" type="number" min="0" step="0.25"></div>
+        <div class="dosis-form-day"><span class="dosis-form-label">Mié</span><input class="dosis-form-input" id="d-mie" placeholder="0" type="number" min="0" step="0.25"></div>
+        <div class="dosis-form-day"><span class="dosis-form-label">Jue</span><input class="dosis-form-input" id="d-jue" placeholder="0" type="number" min="0" step="0.25"></div>
+        <div class="dosis-form-day"><span class="dosis-form-label">Vie</span><input class="dosis-form-input" id="d-vie" placeholder="0" type="number" min="0" step="0.25"></div>
+        <div class="dosis-form-day"><span class="dosis-form-label">Sáb</span><input class="dosis-form-input" id="d-sab" placeholder="0" type="number" min="0" step="0.25"></div>
+        <div class="dosis-form-day"><span class="dosis-form-label">Dom</span><input class="dosis-form-input" id="d-dom" placeholder="0" type="number" min="0" step="0.25"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha de inicio</label>
+      <input class="form-input" id="med-start" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha de fin (opcional)</label>
+      <input class="form-input" id="med-end" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Motivo del cambio (opcional)</label>
+      <input class="form-input" id="med-reason" placeholder="Ej: Ajuste por INR elevado...">
+    </div>
+    <button class="btn btn-primary" onclick="saveMed()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-med')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL INR -->
+<div class="modal-overlay" id="modal-inr">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-inr')">×</button>
+    <div class="modal-title">Registrar control INR</div>
+    <input type="hidden" id="inr-edit-id">
+    <div class="form-group">
+      <label class="form-label">Fecha del control</label>
+      <input class="form-input" id="inr-date" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor INR</label>
+      <input class="form-input" id="inr-value" type="number" step="0.1" min="0" placeholder="Ej: 2.5">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observaciones (opcional)</label>
+      <input class="form-input" id="inr-obs" placeholder="Ej: Sin cambios, ajuste de dosis...">
+    </div>
+    <button class="btn btn-primary" onclick="saveInr()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-inr')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL ESTUDIO -->
+<div class="modal-overlay" id="modal-estudio">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-estudio')">×</button>
+    <div class="modal-title">Nuevo estudio</div>
+    <input type="hidden" id="est-edit-id">
+    <div class="form-group">
+      <label class="form-label">Tipo de estudio</label>
+      <select class="form-input" id="est-tipo">
+        <option value="Laboratorio">Laboratorio</option>
+        <option value="Ecocardiograma">Ecocardiograma</option>
+        <option value="ECG / Electrocardiograma">ECG / Electrocardiograma</option>
+        <option value="Holter">Holter</option>
+        <option value="Radiografía">Radiografía</option>
+        <option value="Tomografía">Tomografía</option>
+        <option value="Resonancia">Resonancia</option>
+        <option value="Ergometría">Ergometría</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Título / descripción corta</label>
+      <input class="form-input" id="est-titulo" placeholder="Ej: Hemograma completo, Control cardíaco...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha</label>
+      <input class="form-input" id="est-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Resultados / observaciones</label>
+      <textarea class="form-input" id="est-resultado" rows="4" placeholder="Copiá los valores o escribí un resumen de los resultados..." style="resize:vertical;line-height:1.5"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Médico / institución (opcional)</label>
+      <input class="form-input" id="est-medico" placeholder="Ej: Dr. García – Hospital Italiano">
+    </div>
+    <button class="btn btn-primary" onclick="saveEstudio()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-estudio')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL BACKUP -->
+<div class="modal-overlay" id="modal-backup">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-backup')">×</button>
+    <div class="modal-title">Backup de datos</div>
+
+    <div class="backup-section">
+      <div class="backup-icon">📤</div>
+      <div class="backup-title">Exportar backup</div>
+      <div class="backup-desc">Descargá un archivo con todos tus datos. Guardalo en Google Drive, WhatsApp o email para no perderlo.</div>
+      <button class="btn btn-primary" style="margin-top:0" onclick="exportBackup()">Exportar backup</button>
+    </div>
+
+    <div class="backup-section">
+      <div class="backup-icon">📥</div>
+      <div class="backup-title">Importar backup</div>
+      <div class="backup-desc">Si cambiaste de celu o navegador, cargá tu backup para recuperar todos los datos.</div>
+      <input type="file" id="backup-file" accept=".json" style="display:none" onchange="importBackup(event)">
+      <button class="btn btn-primary" style="margin-top:0" onclick="document.getElementById('backup-file').click()">Importar backup</button>
+    </div>
+
+    <button class="btn btn-secondary" onclick="closeModal('modal-backup')">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL INR TARGET -->
+<div class="modal-overlay" id="modal-inr-target">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-inr-target')">×</button>
+    <div class="modal-title">Rango objetivo INR</div>
+    <div class="form-group">
+      <label class="form-label">Valor mínimo</label>
+      <input class="form-input" id="inr-min" type="number" step="0.1" min="0" placeholder="Ej: 2.0">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Valor máximo</label>
+      <input class="form-input" id="inr-max" type="number" step="0.1" min="0" placeholder="Ej: 3.0">
+    </div>
+    <button class="btn btn-primary" onclick="saveInrTarget()">Guardar</button>
+    <button class="btn btn-secondary" onclick="closeModal('modal-inr-target')">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// ---- DATA ----
+let data = {
+  meds: [],       // { id, name, unit, periods: [{dosis:{lun,mar,mie,jue,vie,sab,dom}, start, end, reason}] }
+  inr: [],        // { id, date, value, obs }
+  inrTarget: { min: 2.0, max: 3.0 },
+  estudios: []    // { id, tipo, titulo, fecha, resultado, medico }
+};
+
+const DAYS = ['lun','mar','mie','jue','vie','sab','dom'];
+const DAYS_LABEL = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+function load() {
+  try {
+    const saved = localStorage.getItem('cardiolog_v1');
+    if (saved) data = JSON.parse(saved);
+  } catch(e) {}
+}
+function save() {
+  localStorage.setItem('cardiolog_v1', JSON.stringify(data));
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+
+function fmtDate(str) {
+  if (!str) return '–';
+  const [y,m,d] = str.split('-');
+  const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function inrStatus(val) {
+  const {min, max} = data.inrTarget;
+  if (val < min) return {label:'Bajo', cls:'badge-inr'};
+  if (val > max) return {label:'Alto', cls:'badge-high'};
+  return {label:'En rango', cls:'badge-ok'};
+}
+
+// ---- NAVIGATION ----
+let currentSection = 'meds';
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  currentSection = id;
+  render();
+}
+
+function showBackup() {
+  openModal('modal-backup');
+}
+
+// ---- MODALS ----
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function openAddModal() {
+  if (currentSection === 'meds') openMedModal();
+  else if (currentSection === 'inr') openInrModal();
+  else if (currentSection === 'estudios') openEstudioModal();
+  else if (currentSection === 'historial') openMedModal();
+}
+
+// ---- MED MODAL ----
+function openMedModal(medId, periodIdx) {
+  document.getElementById('modal-med-title').textContent = medId ? 'Editar período' : 'Nuevo medicamento';
+  document.getElementById('med-edit-id').value = medId || '';
+  document.getElementById('med-edit-period-idx').value = periodIdx !== undefined ? periodIdx : '';
+  document.getElementById('med-name').value = '';
+  document.getElementById('med-unit').value = 'mg';
+  DAYS.forEach(d => document.getElementById('d-' + d).value = '');
+  document.getElementById('med-start').value = today();
+  document.getElementById('med-end').value = '';
+  document.getElementById('med-reason').value = '';
+
+  if (medId) {
+    const med = data.meds.find(m => m.id === medId);
+    if (med) {
+      document.getElementById('med-name').value = med.name;
+      document.getElementById('med-unit').value = med.unit;
+      // disable name/unit edit when editing a period of existing med
+      if (periodIdx !== undefined && periodIdx !== '') {
+        const p = med.periods[periodIdx];
+        if (p) {
+          DAYS.forEach(d => document.getElementById('d-' + d).value = p.dosis[d] || '');
+          document.getElementById('med-start').value = p.start || '';
+          document.getElementById('med-end').value = p.end || '';
+          document.getElementById('med-reason').value = p.reason || '';
+        }
+      } else {
+        // new period for existing med - pre-fill dosis from last period
+        const last = med.periods[med.periods.length - 1];
+        if (last) DAYS.forEach(d => document.getElementById('d-' + d).value = last.dosis[d] || '');
+      }
+    }
+  }
+  openModal('modal-med');
+}
+
+function addNewPeriod(medId) {
+  openMedModal(medId, undefined);
+}
+
+function saveMed() {
+  const name = document.getElementById('med-name').value.trim();
+  const unit = document.getElementById('med-unit').value;
+  const start = document.getElementById('med-start').value;
+  const end = document.getElementById('med-end').value;
+  const reason = document.getElementById('med-reason').value.trim();
+  const dosis = {};
+  DAYS.forEach(d => dosis[d] = parseFloat(document.getElementById('d-' + d).value) || 0);
+
+  if (!name || !start) { showToast('Completá nombre y fecha de inicio'); return; }
+
+  const editId = document.getElementById('med-edit-id').value;
+  const editPeriodIdx = document.getElementById('med-edit-period-idx').value;
+  const period = { dosis, start, end, reason };
+
+  if (editId) {
+    const med = data.meds.find(m => m.id === editId);
+    if (med) {
+      med.name = name;
+      med.unit = unit;
+      if (editPeriodIdx !== '') {
+        med.periods[parseInt(editPeriodIdx)] = period;
+      } else {
+        // close previous period
+        if (med.periods.length > 0 && !med.periods[med.periods.length-1].end) {
+          const prevStart = new Date(start);
+          prevStart.setDate(prevStart.getDate() - 1);
+          med.periods[med.periods.length-1].end = prevStart.toISOString().split('T')[0];
+        }
+        med.periods.push(period);
+      }
+    }
+  } else {
+    data.meds.push({ id: uid(), name, unit, periods: [period] });
+  }
+
+  save();
+  closeModal('modal-med');
+  render();
+  showToast('Guardado ✓');
+}
+
+function deleteMed(id) {
+  if (!confirm('¿Eliminar este medicamento y todo su historial?')) return;
+  data.meds = data.meds.filter(m => m.id !== id);
+  save(); render(); showToast('Eliminado');
+}
+
+// ---- INR MODAL ----
+function openInrModal(id) {
+  document.getElementById('inr-edit-id').value = id || '';
+  if (id) {
+    const r = data.inr.find(i => i.id === id);
+    document.getElementById('inr-date').value = r.date;
+    document.getElementById('inr-value').value = r.value;
+    document.getElementById('inr-obs').value = r.obs || '';
+  } else {
+    document.getElementById('inr-date').value = today();
+    document.getElementById('inr-value').value = '';
+    document.getElementById('inr-obs').value = '';
+  }
+  openModal('modal-inr');
+}
+
+function saveInr() {
+  const date = document.getElementById('inr-date').value;
+  const value = parseFloat(document.getElementById('inr-value').value);
+  const obs = document.getElementById('inr-obs').value.trim();
+  if (!date || isNaN(value)) { showToast('Completá fecha y valor'); return; }
+  const editId = document.getElementById('inr-edit-id').value;
+  if (editId) {
+    const r = data.inr.find(i => i.id === editId);
+    if (r) { r.date = date; r.value = value; r.obs = obs; }
+  } else {
+    data.inr.push({ id: uid(), date, value, obs });
+  }
+  data.inr.sort((a,b) => b.date.localeCompare(a.date));
+  save(); closeModal('modal-inr'); render(); showToast('Guardado ✓');
+}
+
+function deleteInr(id) {
+  data.inr = data.inr.filter(i => i.id !== id);
+  save(); render(); showToast('Eliminado');
+}
+
+function editInrTarget() {
+  document.getElementById('inr-min').value = data.inrTarget.min;
+  document.getElementById('inr-max').value = data.inrTarget.max;
+  openModal('modal-inr-target');
+}
+
+function saveInrTarget() {
+  const min = parseFloat(document.getElementById('inr-min').value);
+  const max = parseFloat(document.getElementById('inr-max').value);
+  if (isNaN(min) || isNaN(max)) { showToast('Completá los valores'); return; }
+  data.inrTarget = { min, max };
+  save(); closeModal('modal-inr-target'); render(); showToast('Rango actualizado ✓');
+}
+
+// ---- ESTUDIO MODAL ----
+function openEstudioModal(id) {
+  document.getElementById('est-edit-id').value = id || '';
+  if (id) {
+    const e = data.estudios.find(x => x.id === id);
+    document.getElementById('est-tipo').value = e.tipo;
+    document.getElementById('est-titulo').value = e.titulo;
+    document.getElementById('est-fecha').value = e.fecha;
+    document.getElementById('est-resultado').value = e.resultado || '';
+    document.getElementById('est-medico').value = e.medico || '';
+  } else {
+    document.getElementById('est-tipo').value = 'Laboratorio';
+    document.getElementById('est-titulo').value = '';
+    document.getElementById('est-fecha').value = today();
+    document.getElementById('est-resultado').value = '';
+    document.getElementById('est-medico').value = '';
+  }
+  openModal('modal-estudio');
+}
+
+function saveEstudio() {
+  const tipo = document.getElementById('est-tipo').value;
+  const titulo = document.getElementById('est-titulo').value.trim();
+  const fecha = document.getElementById('est-fecha').value;
+  const resultado = document.getElementById('est-resultado').value.trim();
+  const medico = document.getElementById('est-medico').value.trim();
+  if (!titulo || !fecha) { showToast('Completá título y fecha'); return; }
+  const editId = document.getElementById('est-edit-id').value;
+  if (editId) {
+    const e = data.estudios.find(x => x.id === editId);
+    if (e) { e.tipo = tipo; e.titulo = titulo; e.fecha = fecha; e.resultado = resultado; e.medico = medico; }
+  } else {
+    data.estudios.push({ id: uid(), tipo, titulo, fecha, resultado, medico });
+  }
+  data.estudios.sort((a,b) => b.fecha.localeCompare(a.fecha));
+  save(); closeModal('modal-estudio'); render(); showToast('Guardado ✓');
+}
+
+function deleteEstudio(id) {
+  data.estudios = data.estudios.filter(e => e.id !== id);
+  save(); render(); showToast('Eliminado');
+}
+
+// ---- RENDER ----
+function render() {
+  renderMeds();
+  renderInr();
+  renderEstudios();
+  renderHistorial();
+  document.getElementById('inr-target-display').textContent = `${data.inrTarget.min} – ${data.inrTarget.max}`;
+}
+
+function renderMeds() {
+  const el = document.getElementById('meds-list');
+  if (!data.meds.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">💊</div><div class="empty-text">Todavía no hay medicamentos.<br>Tocá + para agregar uno.</div></div>`;
+    return;
+  }
+  el.innerHTML = data.meds.map(med => {
+    const lastP = med.periods[med.periods.length - 1];
+    const isActive = !lastP.end;
+    const dosisHTML = DAYS.map((d,i) => `
+      <div class="dosis-day">
+        <div class="dosis-label">${DAYS_LABEL[i]}</div>
+        <div class="dosis-val ${!lastP.dosis[d] ? 'zero' : ''}">${lastP.dosis[d] || 0}</div>
+      </div>`).join('');
+
+    return `<div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">${med.name}</div>
+          <div class="card-sub">${med.unit} · ${med.periods.length} período${med.periods.length>1?'s':''}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+          <span class="badge ${isActive ? 'badge-active' : 'badge-past'}">${isActive ? '● Activo' : '○ Finalizado'}</span>
+          <div class="card-actions">
+            <button class="btn-icon" onclick="addNewPeriod('${med.id}')" title="Nuevo período">📝</button>
+            <button class="btn-icon danger" onclick="deleteMed('${med.id}')" title="Eliminar">🗑</button>
+          </div>
+        </div>
+      </div>
+      <div class="dosis-grid">${dosisHTML}</div>
+      <div style="font-size:11px;color:var(--text-muted)">Desde ${fmtDate(lastP.start)}${lastP.end ? ' hasta ' + fmtDate(lastP.end) : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderInr() {
+  const el = document.getElementById('inr-list');
+  if (!data.inr.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🩸</div><div class="empty-text">Todavía no hay controles de INR.<br>Tocá + para registrar uno.</div></div>`;
+    return;
+  }
+  el.innerHTML = data.inr.map(r => {
+    const s = inrStatus(r.value);
+    return `<div class="inr-card">
+      <div>
+        <div class="inr-value">${r.value}</div>
+        <div class="inr-meta">${fmtDate(r.date)}${r.obs ? ' · ' + r.obs : ''}</div>
+      </div>
+      <div class="inr-right">
+        <span class="badge ${s.cls}">${s.label}</span>
+        <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+          <button class="btn-icon" onclick="openInrModal('${r.id}')">✏️</button>
+          <button class="btn-icon danger" onclick="deleteInr('${r.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderEstudios() {
+  const el = document.getElementById('estudios-list');
+  if (!data.estudios.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🔬</div><div class="empty-text">Todavía no hay estudios cargados.<br>Tocá + para agregar uno.</div></div>`;
+    return;
+  }
+  el.innerHTML = data.estudios.map(e => `
+    <div class="study-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="study-type">${e.tipo}</div>
+          <div class="study-title">${e.titulo}</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-icon" onclick="openEstudioModal('${e.id}')">✏️</button>
+          <button class="btn-icon danger" onclick="deleteEstudio('${e.id}')">🗑</button>
+        </div>
+      </div>
+      ${e.resultado ? `<div class="study-result">${e.resultado}</div>` : ''}
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="study-date">${fmtDate(e.fecha)}</div>
+        ${e.medico ? `<div class="study-date">${e.medico}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function renderHistorial() {
+  const el = document.getElementById('historial-list');
+  let html = '';
+
+  data.meds.forEach(med => {
+    if (med.periods.length === 0) return;
+    html += `<div style="margin-bottom:20px">
+      <div style="font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:10px;color:var(--text)">${med.name}</div>`;
+    med.periods.forEach((p, i) => {
+      const vals = DAYS.map((d,j) => `${DAYS_LABEL[j]}:${p.dosis[d]||0}`).filter(v => !v.endsWith(':0')).join(' · ');
+      const endLabel = p.end ? fmtDate(p.end) : 'hoy';
+      html += `<div class="hist-period">
+        <div class="hist-range">${fmtDate(p.start)} → ${endLabel}</div>
+        <div class="hist-dosis-summary">${vals || '0 ' + med.unit + ' todos los días'} ${med.unit}</div>
+        ${p.reason ? `<div style="font-size:12px;color:var(--text-muted);margin-top:8px">💬 ${p.reason}</div>` : ''}
+        <div style="display:flex;justify-content:flex-end;margin-top:10px">
+          <button class="btn-icon" onclick="openMedModal('${med.id}', ${i})" title="Editar">✏️</button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  if (!html) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-text">El historial aparece acá cuando registrás medicamentos con sus cambios de dosis.</div></div>`;
+    return;
+  }
+  el.innerHTML = html;
+}
+
+// ---- BACKUP ----
+function exportBackup() {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `cardiolog_backup_${today()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Backup exportado ✓');
+}
+
+function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!imported.meds || !imported.inr) throw new Error('Archivo inválido');
+      if (!confirm('¿Reemplazar todos los datos actuales con este backup?')) return;
+      data = imported;
+      save(); render(); closeModal('modal-backup');
+      showToast('Datos restaurados ✓');
+    } catch(err) {
+      showToast('Archivo inválido');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ---- TOAST ----
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ---- INIT ----
+load();
+render();
+</script>
+</body>
+</html>
